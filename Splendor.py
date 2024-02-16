@@ -103,33 +103,37 @@ class Player:
         self.board = board
 
     def DrawTwoSameCoins(self, coin_color: Colors):
-        # Add code to prevent having more than 9 coins
+        if len(self.coins) > 7:
+            return Exception
+            # Add code to prevent having more than 9 coins
         try:
             typed_coins = list((coin for coin in self.board.coins if coin.color == coin_color))[:2]
             self.coins = self.coins + typed_coins
             self.board.coins = [coins for coins in self.board.coins if coins not in typed_coins]
         except Exception as e:
-            print("Error", e)
+            return e
 
     def DrawThreeOtherCoins(self, coin_color1: Colors, coin_color2: Colors, coin_color3: Colors):
         # Add code to prevent having more than 9 coins
+        if len(self.coins) > 6:
+            return Exception
         try:
-            typed_coin_1 = list((coin for coin in self.board.coins if coin.color == coin_color1))[0]
-            typed_coin_2 = list((coin for coin in self.board.coins if coin.color == coin_color2))[0]
-            typed_coin_3 = list((coin for coin in self.board.coins if coin.color == coin_color3))[0]
+            typed_coin_1 = self.listOfOwnedCoins(coin_color1)[0]
+            typed_coin_2 = self.listOfOwnedCoins(coin_color2)[0]
+            typed_coin_3 = self.listOfOwnedCoins(coin_color3)[0]
             typed_coins = [typed_coin_1, typed_coin_2, typed_coin_3]
             self.coins = self.coins + typed_coins
             self.board.coins = [coins for coins in self.board.coins if coins not in typed_coins]
         except Exception as e:
-            print("Error", e)
+            return e
 
     def BuyCard(self, card: Card):
         try:
-            if self.IsWealthEnough():
+            if self.IsWealthEnough(card):
                 self.ReturnCoinsToBoard(card)
                 self.DrawCard(card)
             else:
-                print("Brak zasobów")
+                print("Brak zasobów lub miejsca")
         except Exception as e:
             print("Error", e)
 
@@ -157,5 +161,14 @@ class Player:
             self.board.coins.append(typed_coin)
             self.coins.remove(typed_coin)
 
-    def IsWealthEnough(self):
-        return True
+    def IsWealthEnough(self, card: Card):
+        if (Card.green_coin_cost >= len(self.listOfOwnedCoins(Colors.Green)) and
+                Card.black_coin_cost >= len(self.listOfOwnedCoins(Colors.Black)) and
+                Card.red_coin_cost >= len(self.listOfOwnedCoins(Colors.Red)) and
+                Card.blue_coin_cost >= len(self.listOfOwnedCoins(Colors.Blue)) and
+                Card.white_coin_cost >= len(self.listOfOwnedCoins(Colors.White))):
+            return True
+        return False
+
+    def listOfOwnedCoins(self, color: Colors):
+        return list(coin for coin in self.board.coins if coin.color == color)
